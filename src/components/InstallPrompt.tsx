@@ -46,7 +46,7 @@ export default function InstallPrompt() {
   }
   if (isIos()) {
     return (
-      <p className="text-sm text-mist/70">
+      <p className="text-sm text-fg-muted">
         Чтобы установить приложение, нажмите «Поделиться» в Safari и выберите «На экран „Домой“».
       </p>
     );

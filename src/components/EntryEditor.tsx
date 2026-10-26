@@ -38,10 +38,10 @@ export default function EntryEditor({ draft, onClose }: Props) {
       <div
         role="dialog"
         aria-label={draft.id == null ? 'Новая запись сна' : 'Редактирование сна'}
-        className="w-full max-w-md space-y-4 rounded-t-3xl bg-ink-800 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-3xl"
+        className="w-full max-w-md space-y-4 rounded-t-3xl bg-surface p-5 shadow-2xl pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold">{draft.id == null ? 'Новая запись' : 'Редактировать сон'}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight">{draft.id == null ? 'Новая запись' : 'Редактировать сон'}</h2>
         <TypeToggle value={type} onChange={setType} />
         <div>
           <label className="label" htmlFor="sleep-start">Уснул</label>
@@ -50,8 +50,8 @@ export default function EntryEditor({ draft, onClose }: Props) {
         <div>
           <div className="mb-1 flex items-center justify-between">
             <label className="label mb-0" htmlFor="sleep-end">Проснулся</label>
-            <label className="flex items-center gap-2 text-sm text-mist/70">
-              <input type="checkbox" checked={running} onChange={(e) => setRunning(e.target.checked)} className="accent-moon" />
+            <label className="flex items-center gap-2 text-sm text-fg-muted">
+              <input type="checkbox" checked={running} onChange={(e) => setRunning(e.target.checked)} className="accent-primary" />
               Ещё спит
             </label>
           </div>
@@ -64,14 +64,14 @@ export default function EntryEditor({ draft, onClose }: Props) {
           <input id="sleep-note" className="field" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Например, уснул в коляске" />
         </div>
         {error ? (
-          <p className="text-sm text-nap">{error}</p>
+          <p className="text-sm text-warn">{error}</p>
         ) : (
-          endTs != null && <p className="text-sm text-mist/60">Длительность: {formatDuration((endTs - startTs) / 60000)}</p>
+          endTs != null && <p className="text-sm text-fg-muted">Длительность: {formatDuration((endTs - startTs) / 60000)}</p>
         )}
         <div className="flex gap-2">
           {draft.id != null && (
             <button
-              className="btn bg-red-500/15 text-red-300"
+              className="btn bg-danger-soft text-danger"
               onClick={async () => {
                 if (confirm('Удалить эту запись?')) {
                   await deleteSleep(draft.id!);

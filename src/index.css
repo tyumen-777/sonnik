@@ -1,34 +1,130 @@
 @import "tailwindcss";
+@import "@fontsource-variable/golos-text";
+@import "@fontsource-variable/unbounded";
 
-@theme {
-  --color-ink-950: #0b0d1f;
-  --color-ink-900: #0f1226;
-  --color-ink-800: #171b36;
-  --color-ink-700: #22274a;
-  --color-ink-600: #343a66;
-  --color-mist: #c9cdf5;
-  --color-moon: #f5d27a;
-  --color-night: #7c83f0;
-  --color-nap: #f2a65a;
-  --font-sans: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+/* Theme is resolved to data-theme="light" | "dark" on <html> before first paint (see index.html). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-link: var(--link);
+  --color-night: var(--night);
+  --color-nap: var(--nap);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-info-soft: var(--info-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ok: var(--ok);
+
+  --font-sans: "Golos Text Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Unbounded Variable", "Golos Text Variable", system-ui, sans-serif;
+}
+
+/*
+ * Day: cool morning haze, navy ink. Night: a nightlight, not a void — every text colour is opaque
+ * and at least 4.5:1 against the surface it sits on. Night sleep is indigo, day sleep is sun amber.
+ */
+:root {
+  --bg: #eef2f8;
+  --surface: #ffffff;
+  --surface-2: #e3e9f3;
+  --line: #d3dbe8;
+  --fg: #18203f;
+  --fg-muted: #4a5572;
+  --fg-faint: #5a6584;
+  --primary: #3a44c4;
+  --on-primary: #ffffff;
+  --link: #3a44c4;
+  --night: #4b55d6;
+  --nap: #d9790a;
+  --warn: #a8400c;
+  --warn-soft: #fbe6d8;
+  --info-soft: #e2e5fb;
+  --danger: #b42318;
+  --danger-soft: #fde4e1;
+  --ok: #1e7f4f;
+  /* The sleep panel: sunlit while the child is awake */
+  --hero: #ffe9b3;
+  --hero-fg: #18203f;
+  --hero-muted: #4a5572;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #151b36;
+  --surface: #1f2649;
+  --surface-2: #2b3361;
+  --line: #3b4579;
+  --fg: #f3f4ff;
+  --fg-muted: #bec5ea;
+  --fg-faint: #a3abd6;
+  --primary: #ffd27a;
+  --on-primary: #18203f;
+  --link: #ffd27a;
+  --night: #8f98ff;
+  --nap: #ffb454;
+  --warn: #ffb37a;
+  --warn-soft: #3a2b33;
+  --info-soft: #2a3270;
+  --danger: #ff9b95;
+  --danger-soft: #3d2433;
+  --ok: #6ee7a8;
+  --hero: #2b3361;
+  --hero-fg: #f3f4ff;
+  --hero-muted: #bec5ea;
+  color-scheme: dark;
+}
+
+/* Asleep: the panel turns into the night sky in both themes. */
+.hero-asleep {
+  --hero: #232b6b;
+  --hero-fg: #f3f4ff;
+  --hero-muted: #c3c9f2;
+  --primary: #ffd27a;
+  --on-primary: #18203f;
+  background-image: radial-gradient(120% 80% at 50% 0%, rgb(255 210 122 / 0.16), transparent 60%);
 }
 
 html,
 body {
-  background: var(--color-ink-900);
-  color: #eef0ff;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
 
-input[type="datetime-local"],
-input[type="date"],
-input[type="time"] {
-  color-scheme: dark;
+:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
 }
 
-@utility card {
-  @apply rounded-3xl bg-ink-800 p-4;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* A grouped block on the page background */
+@utility panel {
+  @apply rounded-[1.25rem] bg-surface p-4;
+}
+
+/* Section heading inside the page flow */
+@utility heading {
+  @apply font-display text-lg font-semibold tracking-tight text-fg;
 }
 
 @utility btn {
@@ -36,17 +132,17 @@ input[type="time"] {
 }
 
 @utility btn-primary {
-  @apply btn bg-moon text-ink-900;
+  @apply btn bg-primary text-on-primary;
 }
 
 @utility btn-ghost {
-  @apply btn bg-ink-700 text-mist;
+  @apply btn bg-surface-2 text-fg;
 }
 
 @utility field {
-  @apply w-full rounded-xl bg-ink-700 px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-moon/60;
+  @apply w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-base text-fg outline-none placeholder:text-fg-faint focus:border-link;
 }
 
 @utility label {
-  @apply mb-1 block text-sm text-mist/70;
+  @apply mb-1 block text-sm text-fg-muted;
 }

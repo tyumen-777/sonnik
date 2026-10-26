@@ -4,6 +4,7 @@ import { useSleeps } from '../db/repo';
 import { personalize } from '../engine/predict';
 import { addDays, startOfDay } from '../engine/time';
 import { formatDuration, minToHhmm } from '../lib/format';
+import Section from './Section';
 
 const MIN_DAYS = 3;
 
@@ -26,52 +27,51 @@ export default function LearnedRhythm({ child }: { child: Child }) {
       : 0;
 
   return (
-    <section className="card space-y-3">
-      <h2 className="font-semibold">Ритм: {child.name}</h2>
+    <Section title={`Ритм: ${child.name}`}>
       {days < MIN_DAYS ? (
-        <p className="text-sm text-mist/60">
+        <p className="text-sm text-fg-muted">
           Пока прогноз опирается на возрастные ориентиры. После {MIN_DAYS} дней записей здесь появится ритм вашего малыша:
           с каждым днём прогноз всё точнее подстраивается под него.
         </p>
       ) : (
         <>
-          <dl className="grid grid-cols-[1fr_auto] gap-y-2 text-sm">
+          <dl className="divide-y divide-line text-sm">
             {windows.map((w, i) => (
-              <div key={i} className="contents">
-                <dt className="text-mist/60">{i < napsPlanned ? `Окно до ${i + 1}-го сна` : 'Окно до ночного сна'}</dt>
-                <dd className="tabular-nums">{formatDuration(w)}</dd>
+              <div key={i} className="flex justify-between gap-3 py-2.5">
+                <dt className="text-fg-muted">{i < napsPlanned ? `Окно до ${i + 1}-го сна` : 'Окно до ночного сна'}</dt>
+                <dd className="text-right font-medium tabular-nums">{formatDuration(w)}</dd>
               </div>
             ))}
             {Array.from({ length: napsPlanned }, (_, i) => (
-              <div key={`nap-${i}`} className="contents">
-                <dt className="text-mist/60">{i + 1}-й дневной сон</dt>
-                <dd className="tabular-nums">{formatDuration(napLenAt(i))}</dd>
+              <div key={`nap-${i}`} className="flex justify-between gap-3 py-2.5">
+                <dt className="text-fg-muted">{i + 1}-й дневной сон</dt>
+                <dd className="text-right font-medium tabular-nums">{formatDuration(napLenAt(i))}</dd>
               </div>
             ))}
             {usualWakeMin != null && (
-              <>
-                <dt className="text-mist/60">Обычный подъём</dt>
-                <dd className="tabular-nums">{minToHhmm(Math.round(usualWakeMin))}</dd>
-              </>
+              <div className="flex justify-between gap-3 py-2.5">
+                <dt className="text-fg-muted">Обычный подъём</dt>
+                <dd className="text-right font-medium tabular-nums">{minToHhmm(Math.round(usualWakeMin))}</dd>
+              </div>
             )}
             {usualBedtimeMin != null && (
-              <>
-                <dt className="text-mist/60">Обычный отбой</dt>
-                <dd className="tabular-nums">{minToHhmm(Math.round(usualBedtimeMin))}</dd>
-              </>
+              <div className="flex justify-between gap-3 py-2.5">
+                <dt className="text-fg-muted">Обычный отбой</dt>
+                <dd className="text-right font-medium tabular-nums">{minToHhmm(Math.round(usualBedtimeMin))}</dd>
+              </div>
             )}
           </dl>
           {shorterBy >= 5 && (
-            <p className="text-sm text-mist/70">
+            <p className="text-sm text-fg-muted">
               Если дневной сон на 30 минут короче обычного, следующее окно бодрствования у малыша короче примерно на{' '}
               {formatDuration(shorterBy)}.
             </p>
           )}
-          <p className="text-xs text-mist/50">
+          <p className="text-sm text-fg-muted">
             По записям за 2 недели, последние дни важнее. Прогноз пересчитывается после каждой записи.
           </p>
         </>
       )}
-    </section>
+    </Section>
   );
 }

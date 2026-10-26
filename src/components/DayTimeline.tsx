@@ -22,14 +22,14 @@ export default function DayTimeline({ entries, day, now, planned = [], plannedNa
 
   return (
     <div>
-      <div className={`relative overflow-hidden rounded-xl bg-ink-700/60 ${compact ? 'h-4' : 'h-9'}`}>
+      <div className={`relative overflow-hidden rounded-lg border border-line bg-surface-2 ${compact ? 'h-4' : 'h-10'}`}>
         {planned.map((p, i) => {
           const end = p.kind === 'night' ? from + len : p.target + (p.durationMin ?? plannedNapMin) * 60000;
           if (p.target >= from + len) return null;
           return (
             <div
               key={i}
-              className={`absolute inset-y-1 rounded-md border border-dashed ${p.kind === 'nap' ? 'border-nap/70' : 'border-night/70'}`}
+              className={`absolute inset-y-1 rounded-md border-2 border-dashed ${p.kind === 'nap' ? 'border-nap' : 'border-night'}`}
               style={{ left: `${pos(p.target)}%`, width: `${Math.max(pos(end) - pos(p.target), 0.8)}%` }}
             />
           );
@@ -41,10 +41,10 @@ export default function DayTimeline({ entries, day, now, planned = [], plannedNa
             style={{ left: `${s.from * 100}%`, width: `${Math.max((s.to - s.from) * 100, 0.4)}%` }}
           />
         ))}
-        {showNow && <div className="absolute inset-y-0 w-0.5 bg-moon" style={{ left: `${pos(now)}%` }} />}
+        {showNow && <div className="absolute -inset-y-px w-0.5 bg-fg" style={{ left: `${pos(now)}%` }} />}
       </div>
       {!compact && (
-        <div className="mt-1 flex justify-between text-[10px] text-mist/40 tabular-nums">
+        <div className="mt-1 flex justify-between text-xs text-fg-muted tabular-nums">
           {['00', '06', '12', '18', '24'].map((h) => <span key={h}>{h}</span>)}
         </div>
       )}

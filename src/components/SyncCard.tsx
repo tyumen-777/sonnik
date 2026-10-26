@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Section from './Section';
 import type { Child } from '../db/schema';
 import {
   cloudEnabled, inviteToChild, isOwner, login, logout, removeMember, syncNow, syncStatusText, useCloudUser,
@@ -20,14 +21,13 @@ export default function SyncCard({ child }: { child: Child }) {
 
   if (!user?.isLoggedIn) {
     return (
-      <section className="card space-y-3">
-        <h2 className="font-semibold">Синхронизация</h2>
-        <p className="text-sm text-mist/70">
+      <Section title="Синхронизация">
+        <p className="text-fg">
           Войдите по почте, чтобы записи появились на всех ваших устройствах и чтобы вести дневник вместе со вторым
           родителем. Без входа всё хранится только на этом устройстве.
         </p>
         <button className="btn-primary w-full" onClick={login}>Войти по почте</button>
-      </section>
+      </Section>
     );
   }
 
@@ -52,32 +52,29 @@ export default function SyncCard({ child }: { child: Child }) {
   }
 
   return (
-    <section className="card space-y-4">
+    <Section title="Синхронизация" className="space-y-4">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="font-semibold">Синхронизация</h2>
-          <p className="text-sm text-mist/60">{user.email}</p>
-        </div>
-        <span className={`shrink-0 text-right text-sm ${status.tone === 'warn' ? 'text-nap' : status.tone === 'ok' ? 'text-emerald-300' : 'text-mist/70'}`}>
+        <p className="min-w-0 truncate text-sm text-fg-muted">{user.email}</p>
+        <span className={`shrink-0 text-right text-sm font-semibold ${status.tone === 'warn' ? 'text-warn' : status.tone === 'ok' ? 'text-ok' : 'text-fg-muted'}`}>
           {status.text}
         </span>
       </div>
 
       <div className="space-y-2">
         <h3 className="text-sm font-semibold">Кто ведёт дневник {child.name}</h3>
-        <ul className="space-y-1 text-sm">
-          <li className="flex justify-between">
+        <ul className="divide-y divide-line text-sm">
+          <li className="flex justify-between py-2">
             <span>{owner ? 'Вы' : 'Создатель профиля'}</span>
-            <span className="text-mist/50">владелец</span>
+            <span className="text-fg-muted">владелец</span>
           </li>
           {members.map((m) => (
-            <li key={m.id} className="flex items-center justify-between gap-2">
+            <li key={m.id} className="flex items-center justify-between gap-2 py-2">
               <span className="truncate">{m.userId === user.userId ? 'Вы' : m.name || m.email}</span>
-              <span className="flex shrink-0 items-center gap-2 text-mist/50">
+              <span className="flex shrink-0 items-center gap-2 text-fg-muted">
                 {m.rejected ? 'отклонил' : m.accepted ? 'в семье' : 'приглашён'}
                 {owner && m.userId !== user.userId && (
                   <button
-                    className="text-red-300/80"
+                    className="-m-2 p-2 font-semibold text-danger"
                     aria-label={`Убрать доступ: ${m.email}`}
                     onClick={() => confirm(`Убрать доступ к профилю для ${m.email}?`) && removeMember(m.id)}
                   >
@@ -111,15 +108,15 @@ export default function SyncCard({ child }: { child: Child }) {
             <button className="btn-primary shrink-0 text-sm" disabled={busy || !email.trim()}>Пригласить</button>
           </form>
         ) : (
-          <p className="text-xs text-mist/50">Приглашать может создатель профиля.</p>
+          <p className="text-sm text-fg-muted">Приглашать может создатель профиля.</p>
         )}
-        {message && <p className="text-sm text-mist/70">{message}</p>}
+        {message && <p className="text-sm text-fg-muted">{message}</p>}
       </div>
 
       <div className="flex gap-2">
         <button className="btn-ghost flex-1 text-sm" onClick={() => syncNow()}>Обновить</button>
         <button className="btn-ghost flex-1 text-sm" onClick={() => logout()}>Выйти</button>
       </div>
-    </section>
+    </Section>
   );
 }

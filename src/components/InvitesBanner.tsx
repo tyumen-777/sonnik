@@ -10,8 +10,8 @@ export default function InvitesBanner() {
   return (
     <div className="space-y-2">
       {invites.map((inv) => (
-        <section key={inv.id} className="card space-y-3 border border-moon/30">
-          <p className="text-sm">
+        <section key={inv.id} className="panel space-y-3 border-2 border-link">
+          <p>
             <span className="font-semibold">{inv.invitedBy?.name || inv.invitedBy?.email || 'Кто-то'}</span> приглашает вас
             вести общий дневник сна{inv.realm?.name ? ` («${inv.realm.name.replace(/^Профиль: /, '')}»)` : ''}.
           </p>

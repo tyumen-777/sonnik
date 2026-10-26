@@ -3,7 +3,7 @@ import type { Child, SleepType } from '../db/schema';
 import { endSleep, startSleep, useSettings, useSleeps } from '../db/repo';
 import { predict } from '../engine/predict';
 import { addDays, minutesOfDay, startOfDay } from '../engine/time';
-import { ageLabel, formatDuration, hhmmToMin } from '../lib/format';
+import { ageLabel, fmtTime, formatDuration, hhmmToMin } from '../lib/format';
 import { useNow } from '../lib/useNow';
 import PredictionCard from '../components/PredictionCard';
 import DayTimeline from '../components/DayTimeline';
@@ -11,6 +11,7 @@ import EntryRow from '../components/EntryRow';
 import EntryEditor, { type Draft } from '../components/EntryEditor';
 import TypeToggle from '../components/TypeToggle';
 import SyncBadge from '../components/SyncBadge';
+import Icon from '../components/Icon';
 
 function clock(ms: number) {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -49,42 +50,55 @@ export default function Today({ child }: { child: Child }) {
 
   const totalToday = todays.reduce((a, s) => a + Math.min(s.end ?? now, now) - Math.max(s.start, today), 0);
 
+  const awakeSince = !running && last?.end ? last.end : null;
+  const status = running
+    ? { label: running.type === 'nap' ? 'Дневной сон' : 'Ночной сон', since: `уснул в ${fmtTime(running.start)}` }
+    : awakeSince
+      ? { label: 'Бодрствует', since: `проснулся в ${fmtTime(awakeSince)}` }
+      : { label: 'Записей пока нет', since: '' };
+
   return (
-    <div className="space-y-4">
-      <header className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-bold">{child.name}</h1>
-        <span className="flex items-center gap-3 text-sm text-mist/60">
+    <div className="space-y-6">
+      <header className="flex items-center justify-between gap-3 px-1">
+        <h1 className="font-display text-2xl font-semibold tracking-tight">{child.name}</h1>
+        <span className="flex items-center gap-3 text-sm text-fg-muted">
           <SyncBadge />
           {ageLabel(child.birthDate, now)}
         </span>
       </header>
 
-      <section className="card flex flex-col items-center gap-4 py-6">
-        <div className="text-sm text-mist/60">
-          {running ? (running.type === 'nap' ? 'Дневной сон' : 'Ночной сон') : last?.end ? 'Бодрствует' : 'Нет записей'}
+      {/* The one loud element: the panel takes the colour of the child's state. */}
+      <section
+        aria-live="polite"
+        className={`rounded-[1.75rem] bg-(--hero) px-5 pt-5 pb-5 text-(--hero-fg) transition-colors duration-700 ${running ? 'hero-asleep' : ''}`}
+      >
+        <div className="flex items-baseline justify-between gap-3 text-sm text-(--hero-muted)">
+          <span className="font-medium">{status.label}</span>
+          <span>{status.since}</span>
         </div>
-        <div className="text-5xl font-bold tabular-nums">
-          {running ? clock(now - running.start) : last?.end ? clock(now - last.end) : '—'}
+        <div className="mt-1 font-display text-[3.25rem] leading-tight font-semibold tracking-tight tabular-nums">
+          {running ? clock(now - running.start) : awakeSince ? clock(now - awakeSince) : '0:00:00'}
         </div>
-        {!running && <TypeToggle value={type} onChange={setChosenType} />}
-        <button
-          className={`h-36 w-36 rounded-full text-lg font-bold shadow-lg transition active:scale-95 ${
-            running ? 'bg-moon text-ink-900 shadow-moon/20' : 'bg-night text-ink-900 shadow-night/20'
-          }`}
-          onClick={async () => {
-            if (running) await endSleep(running.id);
-            else await startSleep(child.id, type);
-            setChosenType(null);
-          }}
-        >
-          {running ? '☀️ Проснулся' : '😴 Уснул'}
-        </button>
-        <button
-          className="text-sm text-mist/60 underline underline-offset-4"
-          onClick={() => setDraft({ childId: child.id, type: suggestedType, start: now - 3600_000, end: now })}
-        >
-          Добавить вручную
-        </button>
+        <div className="mt-4 space-y-3">
+          {!running && <TypeToggle value={type} onChange={setChosenType} />}
+          <button
+            className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-semibold text-on-primary transition active:scale-[0.98]"
+            onClick={async () => {
+              if (running) await endSleep(running.id);
+              else await startSleep(child.id, type);
+              setChosenType(null);
+            }}
+          >
+            <Icon name={running ? 'sun' : 'moon'} />
+            {running ? 'Проснулся' : 'Уснул'}
+          </button>
+          <button
+            className="w-full py-1 text-sm font-medium text-(--hero-muted) underline underline-offset-4"
+            onClick={() => setDraft({ childId: child.id, type: suggestedType, start: now - 3600_000, end: now })}
+          >
+            Добавить сон вручную
+          </button>
+        </div>
       </section>
 
       <PredictionCard
@@ -98,35 +112,37 @@ export default function Today({ child }: { child: Child }) {
         }}
       />
 
-      <section className="card space-y-3">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-semibold">Сегодня</h2>
-          <span className="text-sm text-mist/60">сон {formatDuration(totalToday / 60000)}</span>
+      <section className="space-y-2">
+        <div className="flex items-baseline justify-between px-1">
+          <h2 className="heading">Сегодня</h2>
+          <span className="text-sm text-fg-muted">спал {formatDuration(totalToday / 60000)}</span>
         </div>
-        <DayTimeline
-          entries={sleeps}
-          day={today}
-          now={now}
-          planned={prediction.state === 'awake' ? prediction.plan : []}
-          plannedNapMin={prediction.state === 'awake' ? prediction.napLenMin : 60}
-        />
-        <div className="flex gap-4 text-xs text-mist/50">
-          <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-nap" />день</span>
-          <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-night" />ночь</span>
-          <span><span className="mr-1 inline-block h-2 w-2 rounded-sm border border-dashed border-mist/60" />прогноз</span>
-        </div>
-        {todays.length === 0 ? (
-          <p className="text-sm text-mist/50">Пока нет записей за сегодня.</p>
-        ) : (
-          <div className="-mx-2">
-            {todays.map((s) => (
-              <EntryRow key={s.id} entry={s} now={now} onClick={() => setDraft(s)} />
-            ))}
+        <div className="panel space-y-3">
+          <DayTimeline
+            entries={sleeps}
+            day={today}
+            now={now}
+            planned={prediction.state === 'awake' ? prediction.plan : []}
+            plannedNapMin={prediction.state === 'awake' ? prediction.napLenMin : 60}
+          />
+          <div className="flex gap-4 text-xs text-fg-muted">
+            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-nap" />дневной</span>
+            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-night" />ночной</span>
+            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm border border-dashed border-fg-muted" />прогноз</span>
           </div>
-        )}
+          {todays.length === 0 ? (
+            <p className="text-sm text-fg-muted">Сегодня записей ещё нет. Нажмите «Уснул», когда малыш заснёт.</p>
+          ) : (
+            <div className="-mx-2 divide-y divide-line">
+              {todays.map((s) => (
+                <EntryRow key={s.id} entry={s} now={now} onClick={() => setDraft(s)} />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
-      <p className="px-2 text-center text-xs text-mist/40">
+      <p className="px-2 text-center text-xs text-fg-faint">
         Прогноз — ориентир, а не медицинская рекомендация. Если сон малыша вас беспокоит, обратитесь к педиатру.
       </p>
 

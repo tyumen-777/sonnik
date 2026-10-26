@@ -39,3 +39,11 @@ export const minToHhmm = (min: number) =>
 /** epoch ms ↔ value of <input type="datetime-local"> */
 export const toLocalInput = (ts: number) => format(ts, "yyyy-MM-dd'T'HH:mm");
 export const fromLocalInput = (s: string) => new Date(s).getTime();
+
+/** Russian plural: plural(3, ['дневной сон', 'дневных сна', 'дневных снов']) → "3 дневных сна" */
+export function plural(n: number, [one, few, many]: [string, string, string]): string {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  const word = m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many;
+  return `${n} ${word}`;
+}

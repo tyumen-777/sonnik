@@ -31,15 +31,15 @@ export default function LoginDialog() {
       <form
         role="dialog"
         aria-label={text.title}
-        className="w-full max-w-md space-y-4 rounded-t-3xl bg-ink-800 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-3xl"
+        className="w-full max-w-md space-y-4 rounded-t-3xl bg-surface p-5 shadow-2xl pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-3xl"
         onSubmit={(e) => {
           e.preventDefault();
           if (ready) interaction.onSubmit(Object.fromEntries(fields.map(([n]) => [n, values[n].trim()])));
         }}
       >
-        <h2 className="text-lg font-semibold">{text.title}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight">{text.title}</h2>
         {interaction.type === 'email' && (
-          <p className="text-sm text-mist/70">
+          <p className="text-sm text-fg-muted">
             Пришлём код на почту. После входа записи появятся на всех ваших устройствах, и вы сможете пригласить второго
             родителя.
           </p>
@@ -47,9 +47,9 @@ export default function LoginDialog() {
         {interaction.alerts.map((a, i) => {
           const { text: message, detail } = alertText(a);
           return (
-            <div key={i} className={`rounded-2xl px-3 py-2 text-sm ${a.type === 'error' ? 'bg-red-500/15 text-red-300' : 'bg-night/15 text-mist'}`}>
+            <div key={i} className={`rounded-2xl px-3 py-2 text-sm ${a.type === 'error' ? 'bg-danger-soft text-danger' : 'bg-info-soft text-fg'}`}>
               <p>{message}</p>
-              {detail && <p className="mt-1 break-words text-xs opacity-60">{detail}</p>}
+              {detail && <p className="mt-1 break-words text-xs opacity-80">{detail}</p>}
             </div>
           );
         })}

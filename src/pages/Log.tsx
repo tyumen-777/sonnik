@@ -3,7 +3,8 @@ import type { Child } from '../db/schema';
 import { useSleeps } from '../db/repo';
 import { dailyStats } from '../engine/stats';
 import { addDays, startOfDay } from '../engine/time';
-import { fmtDay, formatDuration } from '../lib/format';
+import { fmtDay, formatDuration, plural } from '../lib/format';
+import Section from '../components/Section';
 import { useNow } from '../lib/useNow';
 import DayTimeline from '../components/DayTimeline';
 import EntryRow from '../components/EntryRow';
@@ -24,14 +25,14 @@ export default function Log({ child }: { child: Child }) {
   const stats = dailyStats(sleeps, first, days, now).reverse();
 
   return (
-    <div className="space-y-4">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Журнал</h1>
+    <div className="space-y-6">
+      <header className="flex items-center justify-between gap-3 px-1">
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Журнал</h1>
         <button
-          className="btn-primary py-2 text-sm"
+          className="btn-primary py-2.5 text-sm"
           onClick={() => setDraft({ childId: child.id, type: 'nap', start: now - 3600_000, end: now })}
         >
-          + Добавить
+          Добавить сон
         </button>
       </header>
 
@@ -40,24 +41,28 @@ export default function Log({ child }: { child: Child }) {
         const entries = sleeps.filter((s) => s.start >= d.day && s.start < next).reverse();
         if (!entries.length && d.totalMin === 0) return null;
         return (
-          <section key={d.day} className="card space-y-2">
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className="font-semibold first-letter:uppercase">{fmtDay(d.day)}</h2>
-              <span className="shrink-0 text-sm text-mist/60">
-                {formatDuration(d.totalMin)} · {d.naps} дн. сн.
+          <Section
+            key={d.day}
+            title={<span className="first-letter:uppercase">{fmtDay(d.day)}</span>}
+            aside={
+              <span className="shrink-0 text-right text-sm text-fg-muted">
+                {formatDuration(d.totalMin)}, {plural(d.naps, ['дневной сон', 'дневных сна', 'дневных снов'])}
               </span>
-            </div>
+            }
+          >
             <DayTimeline entries={sleeps} day={d.day} now={now} compact />
-            <div className="-mx-2">
+            <div className="-mx-2 divide-y divide-line">
               {entries.map((s) => (
                 <EntryRow key={s.id} entry={s} now={now} onClick={() => setDraft(s)} />
               ))}
             </div>
-          </section>
+          </Section>
         );
       })}
 
-      {sleeps.length === 0 && <p className="text-center text-mist/50">Записей пока нет.</p>}
+      {sleeps.length === 0 && (
+        <p className="px-1 text-fg-muted">Записей пока нет. Добавьте прошлый сон кнопкой выше или нажмите «Уснул» на главном экране.</p>
+      )}
       {sleeps.length > 0 && (
         <button className="btn-ghost w-full" onClick={() => setDays((n) => n + PAGE)}>
           Показать ещё
