@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink-950: #0b0d1f;
+  --color-ink-900: #0f1226;
+  --color-ink-800: #171b36;
+  --color-ink-700: #22274a;
+  --color-ink-600: #343a66;
+  --color-mist: #c9cdf5;
+  --color-moon: #f5d27a;
+  --color-night: #7c83f0;
+  --color-nap: #f2a65a;
+  --font-sans: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html,
+body {
+  background: var(--color-ink-900);
+  color: #eef0ff;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+input[type="datetime-local"],
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+@utility card {
+  @apply rounded-3xl bg-ink-800 p-4;
+}
+
+@utility btn {
+  @apply rounded-2xl px-4 py-3 font-semibold transition active:scale-[0.98] disabled:opacity-40;
+}
+
+@utility btn-primary {
+  @apply btn bg-moon text-ink-900;
+}
+
+@utility btn-ghost {
+  @apply btn bg-ink-700 text-mist;
+}
+
+@utility field {
+  @apply w-full rounded-xl bg-ink-700 px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-moon/60;
+}
+
+@utility label {
+  @apply mb-1 block text-sm text-mist/70;
+}

@@ -1,0 +1,7 @@
+node_modules
+dist
+dev-dist
+.env.local
+# Dexie Cloud client secret, created by `npx dexie-cloud create`
+dexie-cloud.key
+.claude/
